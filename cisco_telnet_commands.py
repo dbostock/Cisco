@@ -12,7 +12,7 @@ with open(path, 'r') as f:
 		user  = ""
 #Enter password here
 		password = ""
-#Catch Timeouts
+
 		try:
 #Telnet into the host
 			telnet  = telnetlib.Telnet(HOSTN, 23, timeout=15)
