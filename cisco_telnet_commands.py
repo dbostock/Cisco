@@ -8,7 +8,9 @@ with open(path, 'r') as f:
 	for host in f:
 		HOSTN = host.rstrip()
 		print "scanning " + (HOSTN) + " ..."
+#Enter username here
 		user  = ""
+#Enter password here
 		password = ""
 #Catch Timeouts
 		try:
