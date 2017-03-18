@@ -4,15 +4,16 @@ import errno
 import socket
 
 path="C:\python\list.txt"
+output="C:\python\output.txt"
 with open(path, 'r') as f:
 	for host in f:
 		HOSTN = host.rstrip()
 		print "scanning " + (HOSTN) + " ..."
 #Enter username here
-		user  = ""
+		user  = "dbostock"
 #Enter password here
-		password = ""
-
+		password = "Db0st0ck"
+#Catch Timeouts
 		try:
 #Telnet into the host
 			telnet  = telnetlib.Telnet(HOSTN, 23, timeout=15)
@@ -28,9 +29,9 @@ with open(path, 'r') as f:
 			telnet.write('sh mod | i Unknown' + '\r\n')
 			telnet.write('exit' + '\r')
 			a=telnet.read_all() 
-			f = open("test2"+".txt", 'w')
+			f = open(output, 'a')
 			f.write(str(a))
-			print "Host " + (HOSTN) + " information written to " + path
+			print "Host " + (HOSTN) + " information written to " + output
 #Catch Timeout error, print messages
 		except socket.timeout:
 			print "Timeout for host " + (HOSTN) + " ...\n"
@@ -38,3 +39,4 @@ with open(path, 'r') as f:
 			print "Connection Refused " + (HOSTN) + " ...\n"
 			pass
 			print "Scanning Complete"
+
