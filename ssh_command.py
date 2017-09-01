@@ -16,9 +16,32 @@ with open(path, 'r') as f:
                 try:
                         ssh = paramiko.SSHClient()
                         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                        ssh.connect(host,username='', password='')
+                        ssh.connect(host,username='dbostock_to', password='Db0st0ck!!')
                         print "Connected to %s" % host
-                        break
+#                        break
+                                                # Send the command (non-blocking)
+                        command="run /util bash -c '\''for c in `ls --format single-column /config/filestore/files_d/Common_d/certificate_d/`; do     arr=($(openssl x509 -noout -text -in /config/filestore/files_d/Common_d/certificate_d/${c} |grep -E '\"'sha1'\"'));      if [ -n '\"'${arr[2]}'\"' ];     then         echo ${c};     fi;  done'\''"
+
+                        stdin, stdout, stderr = ssh.exec_command(command)
+
+                                # Wait for the command to terminate
+                        while not stdout.channel.exit_status_ready():
+                                # Only print data if there is data to read in the channel
+                                if stdout.channel.recv_ready():
+
+                                        rl, wl, xl = select.select([stdout.channel], [], [], 0.0)
+                                        if len(rl) > 0:
+                                # Print data from stdout
+                                                print stdout.channel.recv(1024),
+                                                a = stdout.channel.recv(1024),
+                                                f = open(HOSTN+".txt", 'a')
+                                                f.write(str(a))
+
+                                                                #
+                                                                # Disconnect from the host
+                                                                #
+                        print "Command done, closing SSH connection"
+                        ssh.close()
                 except paramiko.AuthenticationException:
                         print "Authentication failed when connecting to %s" % host
                         sys.exit(1)
@@ -30,26 +53,3 @@ with open(path, 'r') as f:
                         if i == 30:
                                 print "Could not connect to %s. Giving up" % host
                                 sys.exit(1)
-# Send the command (non-blocking)
-        command=command="run /util bash -c '\''for c in `ls --format single-column /config/filestore/files_d/Common_d/certificate_d/`; do     arr=($(openssl x509 -noout -text -in /config/filestore/files_d/Common_d/certificate_d/${c} |grep -E '\"'sha1'\"'));      if [ -n '\"'${arr[2]}'\"' ];     then         echo ${c};     fi;  done'\''"
-
-        stdin, stdout, stderr = ssh.exec_command(command)
-
-# Wait for the command to terminate
-        while not stdout.channel.exit_status_ready():
-# Only print data if there is data to read in the channel
-                if stdout.channel.recv_ready():
-
-                        rl, wl, xl = select.select([stdout.channel], [], [], 0.0)
-                        if len(rl) > 0:
-                # Print data from stdout
-                                print stdout.channel.recv(1024),
-                                a = stdout.channel.recv(1024),
-                                f = open(HOSTN+".txt", 'a')
-                                f.write(str(a))
-
-                #
-                # Disconnect from the host
-                #
-        print "Command done, closing SSH connection"
-        ssh.close()
