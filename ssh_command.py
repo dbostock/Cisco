@@ -16,7 +16,7 @@ with open(path, 'r') as f:
                 try:
                         ssh = paramiko.SSHClient()
                         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                        ssh.connect(host,username='dbostock_to', password='Db0st0ck!!')
+                        ssh.connect(host,username='', password='')
                         print "Connected to %s" % host
 #                        break
                                                 # Send the command (non-blocking)
