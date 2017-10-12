@@ -1,8 +1,0 @@
----
-- hosts: ios
-  serial: 1
-  gather_facts: no
-  connection: local
-  roles:
-    - role: IOS_Facts
-    - role: 3750_PushIOS
