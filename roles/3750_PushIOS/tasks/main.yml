@@ -1,0 +1,518 @@
+---
+    - name: Configure connection
+      set_fact:
+        cli:
+          host: "{{mgt_ip_address|default(inventory_hostname)}}"
+          username: "{{username|default(GLUser)}}"
+          password: "{{password|default(GLPass)}}"
+          authorize: "no"
+
+    - name: Copy boot image
+      ntc_file_copy:
+        host: "{{mgt_ip_address|default(inventory_hostname)}}"
+        username: "{{username|default(GLUser)}}"
+        password: "{{password|default(GLPass)}}"
+        platform: cisco_ios_ssh
+        local_file: "/home/u1069621/images/{{ new_image }}"
+        file_system: "flash:"
+      when:
+        - ansible_net_version != '12.2(55)SE11'
+        - flash_freespace >= 13013902
+
+    - name: Verify md5sum
+      ios_command:
+        provider: "{{ cli }}"
+        commands: "verify /md5 flash:/{{ new_image }}"
+        timeout: 120
+      register: md5sum
+
+    - name: Check against md5 variable
+      shell: 'echo {{md5sum}} | head -c -3 | tail -c 32'
+      delegate_to: localhost
+      register: sum
+      changed_when: false
+      failed_when: sum.stdout != "c7d5b7edae840dbc7f39517dba5230f5"
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+        timeout: 300
+      when:
+        - switches == '2'
+        - master == '1'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+        timeout: 300
+      when:
+        - switches == '2'
+        - master == '2'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+        timeout: 300
+      when:
+          - switches == '3'
+          - master == '1'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+        timeout: 300
+      when:
+        - switches == '3'
+        - master == '2'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+        timeout: 300
+      when:
+        - switches == '3'
+        - master == '3'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+        timeout: 300
+      when:
+        - switches == '4'
+        - master  == '1'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+        timeout: 300
+      when:
+        - switches == '4'
+        - master  == '2'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+        timeout: 300
+      when:
+        - switches == '4'
+        - master  == '3'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+        timeout: 300
+      when:
+        - switches == '4'
+        - master  == '4'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+        timeout: 300
+      when:
+        - switches == '5'
+        - master == '1'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+        timeout: 300
+      when:
+        - switches == '5'
+        - master == '2'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flashr: \n \n"
+        timeout: 300
+      when:
+        - switches == '5'
+        - master == '3'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+        timeout: 300
+      when:
+        - switches == '5'
+        - master == '4'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+        timeout: 300
+      when:
+        - switches == '5'
+        - master == '5'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+        timeout: 300
+      when:
+        - switches == '6'
+        - master == '1'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+        timeout: 300
+      when:
+        - switches == '6'
+        - master == '2'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+        timeout: 300
+      when:
+        - switches == '6'
+        - master == '3'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+        timeout: 300
+      when:
+        - switches == '6'
+        - master == '4'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+        timeout: 300
+      when:
+        - switches == '6'
+        - master == '5'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+        timeout: 300
+      when:
+        - switches == '6'
+        - master == '6'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+          - "copy flash:/{{ new_image }} flash7: \n \n"
+        timeout: 300
+      when:
+        - switches == '7'
+        - master == '1'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+          - "copy flash:/{{ new_image }} flash7: \n \n"
+        timeout: 300
+      when:
+        - switches == '7'
+        - master == '2'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+          - "copy flash:/{{ new_image }} flash7: \n \n"
+        timeout: 300
+      when:
+        - switches == '7'
+        - master == '3'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+          - "copy flash:/{{ new_image }} flash7: \n \n"
+        timeout: 300
+      when:
+        - switches == '7'
+        - master == '4'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+          - "copy flash:/{{ new_image }} flash7: \n \n"
+        timeout: 300
+      when:
+        - switches == '7'
+        - master == '5'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+          - "copy flash:/{{ new_image }} flash7: \n \n"
+        timeout: 300
+      when:
+        - switches == '7'
+        - master == '6'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+        timeout: 300
+      when:
+        - switches == '7'
+        - master == '7'
+
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+          - "copy flash:/{{ new_image }} flash7: \n \n"
+          - "copy flash:/{{ new_image }} flash8: \n \n"
+        timeout: 300
+      when:
+        - switches == '8'
+        - master == '1'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+          - "copy flash:/{{ new_image }} flash7: \n \n"
+          - "copy flash:/{{ new_image }} flash8: \n \n"
+        timeout: 300
+      when:
+        - switches == '8'
+        - master == '2'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+          - "copy flash:/{{ new_image }} flash7: \n \n"
+          - "copy flash:/{{ new_image }} flash8: \n \n"
+        timeout: 300
+      when:
+        - switches == '8'
+        - master == '3'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+          - "copy flash:/{{ new_image }} flash7: \n \n"
+          - "copy flash:/{{ new_image }} flash8: \n \n"
+        timeout: 300
+      when:
+        - switches == '8'
+        - master == '4'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+          - "copy flash:/{{ new_image }} flash7: \n \n"
+          - "copy flash:/{{ new_image }} flash8: \n \n"
+        timeout: 300
+      when:
+        - switches == '8'
+        - master == '5'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+          - "copy flash:/{{ new_image }} flash7: \n \n"
+          - "copy flash:/{{ new_image }} flash8: \n \n"
+        timeout: 300
+      when:
+        - switches == '8'
+        - master == '6'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+          - "copy flash:/{{ new_image }} flash8: \n \n"
+        timeout: 300
+      when:
+        - switches == '8'
+        - master == '7'
+
+    - name: Copy to additional switches in Stack
+      ios_command:
+        provider: "{{cli}}"
+        commands:
+          - "copy flash:/{{ new_image }} flash1: \n \n"
+          - "copy flash:/{{ new_image }} flash2: \n \n"
+          - "copy flash:/{{ new_image }} flash3: \n \n"
+          - "copy flash:/{{ new_image }} flash4: \n \n"
+          - "copy flash:/{{ new_image }} flash5: \n \n"
+          - "copy flash:/{{ new_image }} flash6: \n \n"
+          - "copy flash:/{{ new_image }} flash7: \n \n"
+        timeout: 300
+      when:
+        - switches == '8'
+        - master == '8'

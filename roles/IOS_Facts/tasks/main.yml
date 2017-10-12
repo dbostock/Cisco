@@ -1,0 +1,58 @@
+---
+- name: Configure Connection
+  set_fact:
+    cli:
+      host: "{{mgt_ip_address|default(inventory_hostname)}}"
+      username: "{{username|default(GLUser)}}"
+      password: "{{password|default(GLPass)}}"
+      authorize: "no"
+
+- name: get facts from device
+  ios_facts:
+    gather_subset: hardware
+    provider: "{{ cli }}"
+  register: result
+
+
+- name: Get SNMP FACTS
+  # snmp_facts:
+  #   host: '{{mgt_ip_address|default(inventory_hostname)}}'
+  #   version: v2c
+  #   community: '{{GLSNMP}}'
+  shell: '/usr/bin/snmpget -v2c -c {{GLSNMP}} {{mgt_ip_address|default(inventory_hostname)}} .1.3.6.1.4.1.9.9.10.1.1.4.1.1.5.1.1 | cut -d : -f 4'
+  register: freespace
+  delegate_to: localhost
+  changed_when: false
+
+- name: Assign result to flash_freespace var
+  set_fact:
+    flash_freespace: "{{freespace.stdout}}"
+
+- name: Write Facts file.
+  template:
+    src: templates/facts.j2
+    dest: host_vars/{{inventory_hostname}}/ios_facts.yml
+
+- name: Collect switches
+  ios_command:
+    provider: "{{ cli }}"
+    commands: 'show sw | include line|\Ready'
+  register: switchoutput
+
+
+- name: switchcount
+  shell: 'echo -en {{switchoutput}} | grep Ready | wc -l'
+  delegate_to: localhost
+  register: switches
+
+- name: switches
+  set_fact:
+    switches: "{% if switches.stdout=='1' %}1{% elif switches.stdout=='2' %}2{% elif switches.stdout=='3' %}3{% elif switches.stdout=='4' %}4{% elif switches.stdout=='5' %}5{% elif switches.stdout=='6' %}6{% elif switches.stdout=='7' %}7{% elif switches.stdout=='8' %}8{% else %}1{% endif %}"
+
+- name: master
+  shell: 'echo -en {{switchoutput}} | grep \*'
+  register: master
+
+- name: masterswitch
+  set_fact:
+    master: "{% if master.stdout=='*1' %}1{%elif master.stdout=='*2' %}2{%elif master.stdout=='*3' %}3{%elif master.stdout=='*4' %}4{%elif master.stdout=='*5' %}5{%elif master.stdout=='*6' %}6{%elif master.stdout=='*7' %}7{%elif master.stdout=='*8' %}8{% else %}1{% endif %}"
